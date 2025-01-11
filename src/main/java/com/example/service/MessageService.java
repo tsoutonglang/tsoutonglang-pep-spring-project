@@ -55,6 +55,7 @@ public class MessageService {
      * @return a list of all messages
      */
     public List<Message> getAllMessages() {
+        System.out.println("Messages retrieved.");
         return messageRepository.findAll();
     }
 
@@ -64,6 +65,7 @@ public class MessageService {
      * @return Message
      */
     public Message getMessageById(int messageId) {
+        System.out.println("Message retrieved.");
         return messageRepository.findByMessageId(messageId);
     }
 
@@ -72,15 +74,15 @@ public class MessageService {
      * @param messageId
      * @return 1 if deleted, 0 if not found
      */
-    public int deleteMessage(int messageId) {
+    public Integer deleteMessage(int messageId) {
         Message message = messageRepository.findByMessageId(messageId);
 
         if (message == null) {
             System.out.println("No message to delete.");
-            return 0;
+            return null;
         }
 
-        messageRepository.delete(message);
+        messageRepository.deleteById(messageId);
         System.out.println("Message deleted.");
         return 1;
     }
@@ -92,7 +94,10 @@ public class MessageService {
      * @return 1 if updated, 0 if not found or invalid input
      * @throws IllegalArgumentException if the new messageText is blank or too long
      */
-    public int updateMessageText(int messageId, String messageText) {
+    public int updateMessageText(int messageId, Message message) {
+        String messageText = message.getMessageText();
+        System.out.println("New message text: " + messageText);
+
         if (messageText.isEmpty()) {
             System.out.println("Message is empty.");
             throw new IllegalArgumentException("Message cannot be blank.");
@@ -103,14 +108,14 @@ public class MessageService {
             throw new IllegalArgumentException("Message cannot exceed 255 characters.");
         }
 
-        Message message = messageRepository.findByMessageId(messageId);
-        
-        if (message == null) {
+        Message oldMessage = messageRepository.findByMessageId(messageId);
+        if (oldMessage == null) {
             System.out.println("No message to update.");
-            return 0;
+            throw new IllegalArgumentException("Message does not exist.");
         }
 
-        message.setMessageText(messageText);
+        oldMessage.setMessageText(messageText);
+        messageRepository.save(oldMessage);
         System.out.println("Message updated.");
         return 1;
     }

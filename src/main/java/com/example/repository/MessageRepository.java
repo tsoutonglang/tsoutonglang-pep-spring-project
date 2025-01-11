@@ -21,11 +21,11 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
 
     /**
      * Find a message by its id.
-     * @param message_id
-     * @return Optional<Message>
+     * @param messageId
+     * @return Message
      */
     @Query("FROM Message WHERE messageId = :messageID")
-    Message findByMessageId(@Param("messageID") int message_id);
+    Message findByMessageId(@Param("messageID") int messageId);
 
     /**
      * Find all messages posted by a specific user.

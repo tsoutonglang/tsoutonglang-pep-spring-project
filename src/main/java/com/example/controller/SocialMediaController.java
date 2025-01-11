@@ -102,13 +102,8 @@ public class SocialMediaController {
      * If the message did not exist, the response status should be 200, but the response body should be empty.
      */
     @DeleteMapping("/messages/{messageId}")
-    public ResponseEntity<Integer> deleteMessage(@PathVariable Integer messageId) {
-        int rowsAffected = messageService.deleteMessage(messageId);
-
-        if (rowsAffected == 0) {
-            return ResponseEntity.ok(0);
-        }
-        return ResponseEntity.ok(1);
+    public Integer deleteMessage(@PathVariable int messageId) {
+        return messageService.deleteMessage(messageId);
     }
 
     /* 
@@ -117,10 +112,11 @@ public class SocialMediaController {
      * If the update of the message is not successful for any reason, the response status should be 400. (Client error)
      */
     @PatchMapping("/messages/{messageId}")
-    public ResponseEntity<Integer> updateMessageText(@PathVariable Integer messageId, @RequestBody Message message) {
+    public ResponseEntity<?> updateMessageText(@PathVariable int messageId, @RequestBody Message message) {
         try {
-            int rowsAffected = messageService.updateMessageText(messageId, message.getMessageText());
-            return ResponseEntity.ok(rowsAffected);
+            int rowsUpdated = messageService.updateMessageText(messageId, message);
+            System.out.println("Rows updated: " + rowsUpdated);
+            return ResponseEntity.ok(rowsUpdated);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
