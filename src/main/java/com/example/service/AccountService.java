@@ -64,7 +64,7 @@ public class AccountService {
 
         Account foundAccount = accountRepository.findByUsername(username);
 
-        if (!username.equals(foundAccount.getUsername())) {
+        if (foundAccount == null) {
             System.out.println("Account was not found.");
             throw new IllegalArgumentException("Invalid username.");
         }

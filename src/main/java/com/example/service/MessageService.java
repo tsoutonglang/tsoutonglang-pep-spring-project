@@ -2,50 +2,56 @@ package com.example.service;
 
 import com.example.entity.Message;
 import com.example.repository.MessageRepository;
+import com.example.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MessageService {
 
     private final MessageRepository messageRepository;
+    private final AccountRepository accountRepository;
 
     @Autowired
-    public MessageService(MessageRepository messageRepository) {
+    public MessageService(MessageRepository messageRepository, AccountRepository accountRepository) {
         this.messageRepository = messageRepository;
+        this.accountRepository = accountRepository;
     }
 
     /**
      * Creates a new message.
-     *
-     * @param message the message to be created
-     * @return the created message
+     * @param Message
+     * @return Message
      * @throws IllegalArgumentException if messageText is blank, too long, or postedBy is null
      */
     public Message createMessage(Message message) {
-        if (message.getMessageText() == null || message.getMessageText().trim().isEmpty()) {
-            throw new IllegalArgumentException("Message text cannot be blank.");
-        }
-        if (message.getMessageText().length() > 255) {
-            throw new IllegalArgumentException("Message text cannot exceed 255 characters.");
-        }
-        if (message.getPostedBy() == null) {
-            throw new IllegalArgumentException("PostedBy cannot be null.");
+        String messageText = message.getMessageText();
+
+        if (messageText.isEmpty()) {
+            System.out.println("Message is empty.");
+            throw new IllegalArgumentException("Message cannot be blank.");
         }
 
-        // Set the time the message is posted
-        message.setTimePostedEpoch(Instant.now().getEpochSecond());
+        if (messageText.length() > 255) {
+            System.out.println("Message is too long.");
+            throw new IllegalArgumentException("Message cannot exceed 255 characters.");
+        }
+        
+        int postedBy = message.getPostedBy();
+        System.out.println("Account ID: " + postedBy);
+
+        if (accountRepository.findById(postedBy) == null) {
+            System.out.println("Not a valid user.");
+            throw new IllegalArgumentException("User ID does not exist.");
+        }
 
         return messageRepository.save(message);
     }
 
     /**
      * Retrieves all messages.
-     *
      * @return a list of all messages
      */
     public List<Message> getAllMessages() {
@@ -54,61 +60,67 @@ public class MessageService {
 
     /**
      * Retrieves a message by its ID.
-     *
-     * @param messageId the ID of the message
-     * @return an Optional containing the message if found, or empty otherwise
+     * @param messageId
+     * @return Message
      */
-    public Optional<Message> getMessageById(Integer messageId) {
-        return messageRepository.findById(messageId);
+    public Message getMessageById(int messageId) {
+        return messageRepository.findByMessageId(messageId);
     }
 
     /**
      * Deletes a message by its ID.
-     *
-     * @param messageId the ID of the message to be deleted
-     * @return the number of rows affected (1 if deleted, 0 if not found)
+     * @param messageId
+     * @return 1 if deleted, 0 if not found
      */
-    public int deleteMessage(Integer messageId) {
-        if (messageRepository.existsById(messageId)) {
-            messageRepository.deleteById(messageId);
-            return 1;
+    public int deleteMessage(int messageId) {
+        Message message = messageRepository.findByMessageId(messageId);
+
+        if (message == null) {
+            System.out.println("No message to delete.");
+            return 0;
         }
-        return 0;
+
+        messageRepository.delete(message);
+        System.out.println("Message deleted.");
+        return 1;
     }
 
     /**
-     * Updates the text of a message by its ID.
-     *
-     * @param messageId    the ID of the message to be updated
-     * @param messageText  the new message text
-     * @return the number of rows affected (1 if updated, 0 if not found or invalid input)
+     * Updates the text of a message.
+     * @param messageId
+     * @param messageText
+     * @return 1 if updated, 0 if not found or invalid input
      * @throws IllegalArgumentException if the new messageText is blank or too long
      */
-    public int updateMessageText(Integer messageId, String messageText) {
-        if (messageText == null || messageText.trim().isEmpty()) {
-            throw new IllegalArgumentException("Message text cannot be blank.");
-        }
-        if (messageText.length() > 255) {
-            throw new IllegalArgumentException("Message text cannot exceed 255 characters.");
+    public int updateMessageText(int messageId, String messageText) {
+        if (messageText.isEmpty()) {
+            System.out.println("Message is empty.");
+            throw new IllegalArgumentException("Message cannot be blank.");
         }
 
-        Optional<Message> optionalMessage = messageRepository.findById(messageId);
-        if (optionalMessage.isPresent()) {
-            Message message = optionalMessage.get();
-            message.setMessageText(messageText);
-            messageRepository.save(message);
-            return 1;
+        if (messageText.length() > 255) {
+            System.out.println("Message is too long.");
+            throw new IllegalArgumentException("Message cannot exceed 255 characters.");
         }
-        return 0;
+
+        Message message = messageRepository.findByMessageId(messageId);
+        
+        if (message == null) {
+            System.out.println("No message to update.");
+            return 0;
+        }
+
+        message.setMessageText(messageText);
+        System.out.println("Message updated.");
+        return 1;
     }
 
     /**
      * Retrieves all messages posted by a specific user.
-     *
-     * @param userId the ID of the user
-     * @return a list of messages posted by the user
+     * @param postedBy
+     * @return List<Message>
      */
-    public List<Message> getMessagesByUserId(Integer userId) {
-        return messageRepository.findByPostedBy(userId);
+    public List<Message> getMessagesByUserId(int postedBy) {
+        return messageRepository.findByAccountId(postedBy);
     }
 }

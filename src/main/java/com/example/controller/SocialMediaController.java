@@ -4,13 +4,13 @@ import com.example.entity.Account;
 import com.example.entity.Message;
 import com.example.service.AccountService;
 import com.example.service.MessageService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class SocialMediaController {
@@ -91,9 +91,9 @@ public class SocialMediaController {
      * The response status should always be 200, which is the default.
      */
     @GetMapping("/messages/{messageId}")
-    public ResponseEntity<Message> getMessageById(@PathVariable Integer messageId) {
-        Optional<Message> message = messageService.getMessageById(messageId);
-        return message.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.ok(null));
+    public ResponseEntity<Message> getMessageById(@PathVariable int messageId) {
+        Message message = messageService.getMessageById(messageId);
+        return ResponseEntity.ok(message);
     }
 
     /* 
@@ -104,7 +104,11 @@ public class SocialMediaController {
     @DeleteMapping("/messages/{messageId}")
     public ResponseEntity<Integer> deleteMessage(@PathVariable Integer messageId) {
         int rowsAffected = messageService.deleteMessage(messageId);
-        return ResponseEntity.ok(rowsAffected);
+
+        if (rowsAffected == 0) {
+            return ResponseEntity.ok(0);
+        }
+        return ResponseEntity.ok(1);
     }
 
     /* 
