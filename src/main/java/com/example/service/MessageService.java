@@ -42,7 +42,7 @@ public class MessageService {
         int postedBy = message.getPostedBy();
         System.out.println("Account ID: " + postedBy);
 
-        if (accountRepository.findById(postedBy) == null) {
+        if (accountRepository.findByAccountId(postedBy) == null) {
             System.out.println("Not a valid user.");
             throw new IllegalArgumentException("User ID does not exist.");
         }
@@ -126,6 +126,6 @@ public class MessageService {
      * @return List<Message>
      */
     public List<Message> getMessagesByUserId(int postedBy) {
-        return messageRepository.findByAccountId(postedBy);
+        return messageRepository.findAllByPostedBy(postedBy);
     }
 }

@@ -3,8 +3,6 @@ package com.example.repository;
 import com.example.entity.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -24,14 +22,12 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
      * @param messageId
      * @return Message
      */
-    @Query("FROM Message WHERE messageId = :messageID")
-    Message findByMessageId(@Param("messageID") int messageId);
+    Message findByMessageId(int messageId);
 
     /**
      * Find all messages posted by a specific user.
      * @param postedBy
      * @return List<Message>
      */
-    @Query("FROM Message WHERE postedBy = :accountID")
-    List<Message> findByAccountId(@Param("accountID") int postedBy);
+    List<Message> findAllByPostedBy(int postedBy);
 }
